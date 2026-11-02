@@ -1,0 +1,71 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Отчёт о тестировании</title>
+<style>
+  @page { size: 21cm 29.7cm; margin: 2cm 1.5cm 2cm 3cm; }
+  body { font-family: 'Times New Roman'; font-size: 12pt; }
+  h1 { font-size: 18pt; text-align: center; }
+  h2 { font-size: 16pt; }
+  h3 { font-size: 14pt; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border: 1px solid black; padding: 3pt 5pt; font-size: 10pt; vertical-align: top; }
+  th { background: #d9d9d9; }
+  pre { font-family: 'Courier New'; font-size: 9pt; background: #f2f2f2; margin: 0; }
+</style>
+</head>
+<body>
+  <h1>ОТЧЁТ О ТЕСТИРОВАНИИ DJANGO-ПРОЕКТА</h1>
+  <p align="center">Сформирован: {{ generated }}</p>
+
+  <h2>1. Общая сводка</h2>
+  <table border="1" cellspacing="0" cellpadding="4" style="width:50%">
+    <tr><th>Показатель</th><th>Значение</th></tr>
+    <tr><td>Всего тестов</td><td align="center">{{ total }}</td></tr>
+    <tr><td>Тестовых классов</td><td align="center">{{ groups|length }}</td></tr>
+    {% if ran %}
+      <tr><td>Пройдено</td><td align="center">{{ passed }}</td></tr>
+      <tr><td>Упало / с ошибкой</td><td align="center">{{ failed_count }}</td></tr>
+    {% endif %}
+  </table>
+
+  <h2>2. Список тестов по классам</h2>
+  {% for g in groups %}
+    <h3>2.{{ forloop.counter }}. {{ g.cls }} ({{ g.module }})</h3>
+    {% if g.doc %}<p><i>{{ g.doc }}</i></p>{% endif %}
+    <table border="1" cellspacing="0" cellpadding="4">
+      <tr><th width="5%">№</th><th width="35%">Тест</th><th width="40%">Что проверяется</th><th width="20%">Результат</th></tr>
+      {% for t in g.tests %}
+        <tr>
+          <td align="center">{{ t.num }}</td>
+          <td>{{ t.name }}</td>
+          <td>{{ t.description|default:"—" }}</td>
+          <td align="center" bgcolor="{% if t.status == 'OK' %}#C6EFCE{% elif t.status == 'FAIL' or t.status == 'ERROR' %}#FFC7CE{% else %}#FFFFFF{% endif %}"><b>{{ t.status_ru }}</b></td>
+        </tr>
+      {% endfor %}
+    </table>
+    <p>&nbsp;</p>
+  {% endfor %}
+
+  <h2>3. Исходный код тестов</h2>
+  {% for g in groups %}
+    <h3>3.{{ forloop.counter }}. {{ g.cls }}</h3>
+    {% for t in g.tests %}
+      <p><b>{{ t.name }}</b></p>
+      <pre>{{ t.source }}</pre>
+      <p>&nbsp;</p>
+    {% endfor %}
+  {% endfor %}
+
+  {% if failed %}
+    <h2>4. Упавшие тесты (подробности)</h2>
+    {% for t in failed %}
+      <p><b>{{ t.module }}.{{ t.cls }}.{{ t.name }}</b></p>
+      <pre>{{ t.error }}</pre>
+      <p>&nbsp;</p>
+    {% endfor %}
+  {% endif %}
+</body>
+</html>

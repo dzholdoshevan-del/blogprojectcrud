@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head><meta charset="utf-8"><title>{{ blog.title }}</title></head>
+<body>
+  <a href="{% url 'blog:list' %}">&larr; Назад к списку</a>
+  <h1>{{ blog.title }}</h1>
+  <p>{{ blog.content }}</p>
+  <p>Лайки/просмотры: {{ blog.likes }}</p>
+</body>
+</html>

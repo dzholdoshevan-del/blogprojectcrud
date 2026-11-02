@@ -1,0 +1,17 @@
+{% extends 'crud/base.html' %}
+{% block title %}Записи{% endblock %}
+{% block content %}
+  <h1>Записи</h1>
+  <p><a class="btn" href="{% url 'crud:create' %}">+ Добавить</a></p>
+  <ul>
+    {% for item in items %}
+      <li>
+        <a href="{{ item.get_absolute_url }}">{{ item.title }}</a>
+        &nbsp;<a href="{% url 'crud:update' item.pk %}">изменить</a>
+        &nbsp;<a class="danger" href="{% url 'crud:delete' item.pk %}">удалить</a>
+      </li>
+    {% empty %}
+      <li>Записей пока нет.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

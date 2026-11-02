@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Отчёт о тестировании</title>
+  <style>
+    body { font-family: 'Times New Roman', serif; max-width: 960px; margin: 30px auto; padding: 0 16px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+    th, td { border: 1px solid #000; padding: 4px 8px; font-size: 14px; vertical-align: top; }
+    th { background: #d9d9d9; }
+    td.ok { background: #c6efce; text-align: center; font-weight: bold; }
+    td.fail { background: #ffc7ce; text-align: center; font-weight: bold; }
+    td.na { text-align: center; }
+    pre { background: #f2f2f2; border-left: 3px solid #999; padding: 8px; font-size: 12px; overflow-x: auto; }
+    a.btn { display: inline-block; padding: 8px 14px; border: 1px solid #555; background: #f4f4f4;
+            color: #000; text-decoration: none; margin-right: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Отчёт о тестировании Django-проекта</h1>
+  <p>Сформирован: {{ generated }}</p>
+  <p>
+    <a class="btn" href="{% url 'reports:download_doc' %}{% if run_flag == '0' %}?run=0{% endif %}">Скачать Word (.doc)</a>
+    <a class="btn" href="{% url 'reports:download_docx' %}{% if run_flag == '0' %}?run=0{% endif %}">Скачать Word (.docx)</a>
+    {% if run_flag == '0' %}<a class="btn" href="{% url 'reports:report' %}">Запустить тесты</a>
+    {% else %}<a class="btn" href="{% url 'reports:report' %}?run=0">Без запуска</a>{% endif %}
+  </p>
+
+  <h2>1. Общая сводка</h2>
+  <table style="width:auto">
+    <tr><th>Показатель</th><th>Значение</th></tr>
+    <tr><td>Всего тестов</td><td>{{ total }}</td></tr>
+    <tr><td>Тестовых классов</td><td>{{ groups|length }}</td></tr>
+    {% if ran %}
+      <tr><td>Пройдено</td><td>{{ passed }}</td></tr>
+      <tr><td>Упало / с ошибкой</td><td>{{ failed_count }}</td></tr>
+    {% endif %}
+  </table>
+
+  <h2>2. Список тестов по классам</h2>
+  {% for g in groups %}
+    <h3>2.{{ forloop.counter }}. {{ g.cls }} ({{ g.module }})</h3>
+    {% if g.doc %}<p><i>{{ g.doc }}</i></p>{% endif %}
+    <table>
+      <tr><th>№</th><th>Тест</th><th>Что проверяется</th><th>Результат</th></tr>
+      {% for t in g.tests %}
+        <tr>
+          <td>{{ t.num }}</td>
+          <td>{{ t.name }}</td>
+          <td>{{ t.description|default:"—" }}</td>
+          <td class="{% if t.status == 'OK' %}ok{% elif t.status == 'FAIL' or t.status == 'ERROR' %}fail{% else %}na{% endif %}">{{ t.status_ru }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endfor %}
+
+  <h2>3. Исходный код тестов</h2>
+  {% for g in groups %}
+    <h3>3.{{ forloop.counter }}. {{ g.cls }}</h3>
+    {% for t in g.tests %}
+      <p><b>{{ t.name }}</b></p>
+      <pre>{{ t.source }}</pre>
+    {% endfor %}
+  {% endfor %}
+
+  {% if failed %}
+    <h2>4. Упавшие тесты (подробности)</h2>
+    {% for t in failed %}
+      <p><b>{{ t.module }}.{{ t.cls }}.{{ t.name }}</b></p>
+      <pre>{{ t.error }}</pre>
+    {% endfor %}
+  {% endif %}
+</body>
+</html>
